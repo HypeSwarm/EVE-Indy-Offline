@@ -201,14 +201,52 @@ public class InfoPanel {
         }
         if(topSelect==MainInterface.structuresTab){
             Structure selectedStructure=TopSelectionTabs.SELECTED_STRUCTURE;
+            if(!TopSelectionTabs.isArraysLoaded)TopSelectionTabs.loadStructureLists();
             if(selectedStructure!=null){
                 ImageIcon icon=FileHandler.getIconFile("Types/"+selectedStructure.getStructureTypeID()+"_64.png");
                 Image resized=icon.getImage().getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH);
                 selectedIcon.setIcon(new ImageIcon(resized));
                 selectedLabel.setText("<HTML><center>"+selectedStructure.getStructureName()+"</center></HTML>");
+                MainInterface.selectedStructureType.setText("Structure Type: "+selectedStructure.getStructureType());
+                MainInterface.selectedStructureLocation.setText("Structure Type: "+selectedStructure.getSecLoc());
+                DefaultComboBoxModel rig1Type=new DefaultComboBoxModel();
+                DefaultComboBoxModel rig2Type=new DefaultComboBoxModel();
+                DefaultComboBoxModel rig3Type=new DefaultComboBoxModel();
+                if("Sotiyo".equals(selectedStructure.getStructureType())||"Keepstar".equals(selectedStructure.getStructureType())){
+                    for(String group:TopSelectionTabs.RIGGROUPS_XL){
+                        rig1Type.addElement(group);
+                        rig2Type.addElement(group);
+                        rig3Type.addElement(group);
+                    }
+                }else{
+                    for(String group:TopSelectionTabs.RIGGROUPS){
+                        rig1Type.addElement(group);
+                        rig2Type.addElement(group);
+                        rig3Type.addElement(group);
+                    }
+                }
+                MainInterface.selectedRig1Type.setModel(rig1Type);
+                MainInterface.selectedRig2Type.setModel(rig2Type);
+                MainInterface.selectedRig3Type.setModel(rig3Type);
+                
+                
             }else{
                 selectedIcon.setIcon(new ImageIcon(FileHandler.getIconFile("UI/structurebrowser.png").getImage().getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH)));
                 selectedLabel.setText("<HTML><center>Structures Tab</center></HTML>");
+                MainInterface.selectedStructureType.setText("Structure Type: ");
+                MainInterface.selectedStructureLocation.setText("Structure Type: ");
+                MainInterface.selectedRig1Type.setModel(new DefaultComboBoxModel());
+                MainInterface.selectedRig1Type.setSelectedIndex(-1);
+                MainInterface.selectedRig1.setModel(new DefaultComboBoxModel());
+                MainInterface.selectedRig1.setSelectedIndex(-1);
+                MainInterface.selectedRig2Type.setModel(new DefaultComboBoxModel());
+                MainInterface.selectedRig2Type.setSelectedIndex(-1);
+                MainInterface.selectedRig2.setModel(new DefaultComboBoxModel());
+                MainInterface.selectedRig2.setSelectedIndex(-1);
+                MainInterface.selectedRig3Type.setModel(new DefaultComboBoxModel());
+                MainInterface.selectedRig3Type.setSelectedIndex(-1);
+                MainInterface.selectedRig3.setModel(new DefaultComboBoxModel());
+                MainInterface.selectedRig3.setSelectedIndex(-1);
             }
         }
         if(topSelect==MainInterface.charactersTab){
@@ -246,4 +284,9 @@ public class InfoPanel {
         }
         DataArrayLists.saveData();
     }
+
+    static void updateSelectedStructure() {
+        
+    }
+    
 }

@@ -12,15 +12,15 @@ import sde.SDEDatabase;
  * @author HypeSwarm
  */
 public class Rig {
-    public static final double TECH1_ME_MOD=0.02;
-    public static final double TECH2_ME_MOD=0.024;
-    public static final double TECH1_TE_MOD=0.2;
-    public static final double TECH2_TE_MOD=0.24;
-    public static final double TECH1_COST_MOD=0.2;
-    public static final double TECH2_COST_MOD=0.24;
-    public static final double HS_LOC_MOD=1.0;
-    public static final double LS_LOC_MOD=1.9;
-    public static final double NS_LOC_MOD=2.1;
+    private static final double TECH1_ME_MOD=0.02;
+    private static final double TECH2_ME_MOD=0.024;
+    private static final double TECH1_TE_MOD=0.2;
+    private static final double TECH2_TE_MOD=0.24;
+    private static final double TECH1_COST_MOD=0.2;
+    private static final double TECH2_COST_MOD=0.24;
+    private static final double HS_LOC_MOD=1.0;
+    private static final double LS_LOC_MOD=1.9;
+    private static final double NS_LOC_MOD=2.1;
     
     private final int rigID;
     private final boolean isTech2;

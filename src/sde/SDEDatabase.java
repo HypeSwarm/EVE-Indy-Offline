@@ -10,6 +10,7 @@ package sde;
  * @author HypeSwarm
  */
 public class SDEDatabase {
+    //Public Static Access for all SDE types
     public final static RigBonuses RIG_BONUSES=new RigBonuses();
     public final static Blueprints BLUEPRINTS=new Blueprints();
     public final static RamActivities RAM_ACTIVITIES=new RamActivities();

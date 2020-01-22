@@ -7,6 +7,7 @@ package indy;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 import sde.SDEDatabase;
 
@@ -18,6 +19,8 @@ public final class JobManufacturing extends Job{
     private static final AtomicInteger COUNT = new AtomicInteger(0);
     private final ArrayList<Materials> baseMaterials=new ArrayList<>();
     private final ArrayList<Materials> modifiedMaterials=new ArrayList<>();
+    private final ArrayList<Materials> componentsNeed=new ArrayList<>();
+    private final ArrayList<JobComponent> components=new ArrayList<>();
     private int blueprintME;
     private int blueprintTE;
     private final int outcomeID;
@@ -34,6 +37,32 @@ public final class JobManufacturing extends Job{
 
     public ArrayList<Materials> getModifiedMaterials() {
         return modifiedMaterials;
+    }
+    
+    public ArrayList<Materials> getRawModifiedMaterials(){
+        ArrayList<Materials> rawMats=new ArrayList<>();
+        modifiedMaterials.stream().filter((mat) -> (!mat.isComponent())).forEach((mat) -> {
+            rawMats.add(new Materials(mat.getTypeID(),mat.getQuantity()));
+        });
+        components.stream().forEach((component) -> {
+            ArrayList<Materials>componentMats=component.getComponentModifiedMaterials();
+            componentMats.stream().forEach((mat) -> {
+                if(rawMats.isEmpty()){
+                    rawMats.add(new Materials(mat.getTypeID(),mat.getQuantity()));
+                }else{
+                    boolean isAdded=false;
+                    for(Materials raw:rawMats){
+                        if(raw.getTypeID()==mat.getTypeID()){
+                            raw.setQuantity(raw.getQuantity()+mat.getQuantity());
+                            isAdded=true;
+                        }
+                    }
+                    if(!(isAdded))rawMats.add(new Materials(mat.getTypeID(),mat.getQuantity()));
+                }
+            });
+        });
+        Collections.sort(rawMats);
+        return rawMats;
     }
 
     public int getOutcomeID() {
@@ -81,16 +110,16 @@ public final class JobManufacturing extends Job{
     }
     
 
-    public JobManufacturing(int blueprintID, int structureID,int blueprintME,int blueprintTE, int runs, int blueprintsUsed) {
-        super(COUNT.incrementAndGet(),blueprintID, structureID,1, runs, blueprintsUsed);
-        this.baseMaterials.addAll(SDEDatabase.BLUEPRINTS.getIndyMaterials(blueprintID));
+    public JobManufacturing(int blueprintID, Structure structure,int blueprintME,int blueprintTE, int runs, int blueprintsUsed) {
+        super(COUNT.incrementAndGet(),blueprintID, structure,1, runs, blueprintsUsed);
+        this.baseMaterials.addAll(SDEDatabase.BLUEPRINTS.getManufactoringMaterials(blueprintID));
         this.blueprintME=blueprintME;
         this.blueprintTE=blueprintTE;
-        this.outcomeID=SDEDatabase.BLUEPRINTS.getIndyOutputID(blueprintID);
+        this.outcomeID=SDEDatabase.BLUEPRINTS.getManufactoringOutputID(blueprintID);
         this.outcomeName=SDEDatabase.TYPE_IDS.getTypeName(outcomeID);
         this.groupID=SDEDatabase.TYPE_IDS.getGroupID(outcomeID);
         this.categoryID=SDEDatabase.GROUP_IDS.getCategoryID(groupID);
-        this.outcomePerRun=SDEDatabase.BLUEPRINTS.getIndyOutputQuantity(blueprintID);
+        this.outcomePerRun=SDEDatabase.BLUEPRINTS.getManufactoringOutputQuantity(blueprintID);
         this.estOutcomeCost=0.0;
         this.outComeMarketValue=0.0;
         this.calcModMaterials();
@@ -107,15 +136,37 @@ public final class JobManufacturing extends Job{
         baseMaterials.stream().forEach((mat) -> {
             modifiedMaterials.add(new Materials(mat.getTypeID(),mat.getQuantity()));
         });
-        double totalMEBonus=DataArrayLists.getStructureByID(this.structureID).structureMEBonus(categoryID,groupID,1)*(1-blueprintME*0.01);
+        double totalMEBonus=this.structure.structureMEBonus(categoryID,groupID,1)*(1-blueprintME*0.01);
         modifiedMaterials.stream().forEach((mats) -> {
-            mats.modifyMats(totalMEBonus,this.runs,this.blueprintsUsed);
+            mats.modifyMats(totalMEBonus,this.runs,this.blueprintsUsed,0);
         });
+        calcComponentMats();
     }
     
+    private void calcComponentMats(){
+        componentsNeed.clear();
+        //Update the component quantities after ModifyMats is ran
+        modifiedMaterials.stream().filter((mat) -> (mat.isComponent())).forEach((mat) -> {
+            componentsNeed.add(mat);
+        });
+        //Only true on first run
+        //Adds all the component Jobs
+        if(components.isEmpty()){
+            componentsNeed.stream().forEach((component) -> {
+                components.add(new JobComponent(component.getTypeID(),component.getQuantity()));
+            });
+        //Updates the quantity of the previous component jobs
+        }else{
+            componentsNeed.stream().forEach((component) -> {
+                components.stream().filter((job) -> (job.getComponentID()==component.getTypeID())).forEach((job) -> {
+                    job.setQuantity(component.getQuantity());
+                });
+            });
+        }
+    }
+        
     @Override
     public void durationModify() {
-        Structure structure=DataArrayLists.getStructureByID(this.structureID);
         this.durationModified=(int)(duration*(1-blueprintTE*0.01)*structure.structureTEBonus(categoryID,groupID,1)*0.8*0.85)*runs*blueprintsUsed;
     }
     
@@ -124,7 +175,7 @@ public final class JobManufacturing extends Job{
         return new Object[] {
             this.jobID,
             super.getBlueprintName(),
-            super.getStructureName(),
+            super.structure.getStructureName(),
             super.runs,
             super.blueprintsUsed,
             super.blueprintsUsed*super.runs*this.outcomePerRun,

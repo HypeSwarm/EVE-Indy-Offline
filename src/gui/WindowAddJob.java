@@ -65,7 +65,7 @@ public final class WindowAddJob extends javax.swing.JPanel {
                 return false;
             }
         }
-        int outputID=SDEDatabase.BLUEPRINTS.getIndyOutputID(blueprint.getBluePrintID());
+        int outputID=SDEDatabase.BLUEPRINTS.getManufactoringOutputID(blueprint.getBluePrintID());
         int parentID=SDEDatabase.TYPE_IDS.getVariationParentID(outputID);
         Blueprint parentBlueprint=null;
         if(parentID!=0&&SDEDatabase.TYPE_IDS.getMetaGroup(outputID)!=4)parentBlueprint=SDEDatabase.BLUEPRINTS.getBlueprintByOutputID(parentID);

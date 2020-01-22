@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.function.Consumer;
 import sde.FileHandler;
 
 /**
@@ -23,7 +24,7 @@ public class DataArrayLists {
     public static final ArrayList<JobInvention> JOBS_INVENTION=new ArrayList<>();
     public static final ArrayList<JobResearch> JOBS_RESEARCH=new ArrayList<>();
     public static final ArrayList<Materials> ALL_MATS=new ArrayList<>();
-    
+            
     //ArrayList Get By Index
     public static Structure getStructure(int index){
         return STRUCTURES.get(index);
@@ -112,8 +113,8 @@ public class DataArrayLists {
         
     public static void setAllMats(){
         ALL_MATS.clear();
-        for(JobManufacturing job:JOBS_MANUFACTURING){
-            for(Materials mat:job.getModifiedMaterials()){
+        JOBS_MANUFACTURING.stream().forEach((JobManufacturing job) -> {
+            job.getModifiedMaterials().stream().forEach((mat) -> {
                 if(ALL_MATS.isEmpty()){
                     ALL_MATS.add(new Materials(mat.getTypeID(),mat.getQuantity()));
                 }else{
@@ -127,8 +128,8 @@ public class DataArrayLists {
                     }
                     if(!(added))ALL_MATS.add(new Materials(mat.getTypeID(),mat.getQuantity()));
                 }
-            }
-        }
+            });
+        });
         Collections.sort(ALL_MATS);
     }
 
@@ -146,6 +147,43 @@ public class DataArrayLists {
         return 0;
     }
     
+    public static boolean checkIsStructureUsed(int structureID){
+        if(JOBS_MANUFACTURING.stream().anyMatch((job) -> (job.getStructureID()==structureID))) {
+            return true;
+        }
+        if(JOBS_REACTION.stream().anyMatch((job) -> (job.getStructureID()==structureID))) {
+            return true;
+        }
+        if(JOBS_COPYING.stream().anyMatch((job) -> (job.getStructureID()==structureID))) {
+            return true;
+        }
+        if(JOBS_INVENTION.stream().anyMatch((job) -> (job.getStructureID()==structureID))) {
+            return true;
+        }
+        if(JOBS_RESEARCH.stream().anyMatch((job) -> (job.getStructureID()==structureID))) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static void deleteAllJobsInStructure(int structureID){
+        JOBS_MANUFACTURING.stream().filter((job) -> (job.getStructureID()==structureID)).forEach((job) -> {
+            JOBS_MANUFACTURING.remove(job);
+        });
+        JOBS_REACTION.stream().filter((job) -> (job.getStructureID()==structureID)).forEach((job) -> {
+            JOBS_REACTION.remove(job);
+        });
+        JOBS_COPYING.stream().filter((job) -> (job.getStructureID()==structureID)).forEach((job) -> {
+            JOBS_COPYING.remove(job);
+        });
+        JOBS_INVENTION.stream().filter((job) -> (job.getStructureID()==structureID)).forEach((job) -> {
+            JOBS_INVENTION.remove(job);
+        });
+        JOBS_RESEARCH.stream().filter((job) -> (job.getStructureID()==structureID)).forEach((job) -> {
+            JOBS_RESEARCH.remove(job);
+        });
+    }
+    
     public static void saveData(){
         ArrayList[] data={
             STRUCTURES,
@@ -153,7 +191,7 @@ public class DataArrayLists {
             JOBS_REACTION,
             JOBS_COPYING,
             JOBS_INVENTION,
-            JOBS_RESEARCH
+            JOBS_RESEARCH,
         };
         try {
             String json = new ObjectMapper().writeValueAsString(data);

@@ -5,6 +5,7 @@
  */
 package gui;
 
+import indy.ComponentSettings;
 import indy.DataArrayLists;
 import indy.Rig;
 import indy.Structure;
@@ -21,21 +22,14 @@ import sde.SDEDatabase;
  * @author HypeSwarm
  */
 public class WindowAddStructure extends javax.swing.JPanel {
-    private static final String[] RIGGROUPS={"Combat Rig","Engineering Rig","Drilling Rig","Reactor Rig","Resource Rig"};
-    private static final String[] RIGGROUPS_XL={"Combat Rig","Engineering Rig"};
-    private static final ArrayList<Integer> STRUCTURE_RIG_GROUPIDS=SDEDatabase.GROUP_IDS.getStructureRiqGroupIDs();
-    private static final ArrayList<String> STRUCTURE_M_RIGS=new ArrayList<>();
-    private static final ArrayList<String> STRUCTURE_L_RIGS=new ArrayList<>();
-    private static final ArrayList<String> STRUCTURE_XL_RIGS=new ArrayList<>();
     private String currentSize="M";
-    private static boolean isArraysLoaded=false;
     /**
      * Creates new form AddStructure
      * @return 
      */
     public WindowAddStructure window() {
         initComponents();
-        loadRigGroups();
+        updateRigLists(currentSize);
         
         structureType.addItemListener(new ItemListener(){
             @Override
@@ -317,6 +311,7 @@ public class WindowAddStructure extends javax.swing.JPanel {
                 taxSet=Double.parseDouble(tax.getText());
             }catch(Exception e){}
             DataArrayLists.addStructure(new Structure(0,structureName.getText(),1, structureType.getSelectedItem().toString(), secLoc.getSelectedItem().toString(),rigs,taxSet));
+            if(DataArrayLists.STRUCTURES.size()==1)ComponentSettings.setDefaultStructure(DataArrayLists.getStructure(0).getStructureID());
             return true;
         }else{
             return false;
@@ -354,37 +349,19 @@ public class WindowAddStructure extends javax.swing.JPanel {
     private javax.swing.JTextField tax;
     // End of variables declaration//GEN-END:variables
     
-    private void loadRigGroups() {
-        if(!isArraysLoaded){
-            for(int id:STRUCTURE_RIG_GROUPIDS){
-                String name=SDEDatabase.GROUP_IDS.getGroupName(id);
-                if(name.contains("Rig M")){
-                    STRUCTURE_M_RIGS.add(name);
-                }
-                if(name.contains("Rig L")){
-                    STRUCTURE_L_RIGS.add(name);
-                }
-                if(name.contains("Rig XL")){
-                    STRUCTURE_XL_RIGS.add(name);
-                }
-            }
-            isArraysLoaded=true;
-        }
-        updateRigLists(currentSize);
-    }
-    
     private void updateRigLists(String size){
+        if(!TopSelectionTabs.isArraysLoaded)TopSelectionTabs.loadStructureLists();
         DefaultComboBoxModel rig1TypeBox = new DefaultComboBoxModel();
         DefaultComboBoxModel rig2TypeBox = new DefaultComboBoxModel();
         DefaultComboBoxModel rig3TypeBox = new DefaultComboBoxModel();
         if(size.equals("XL")){
-            for(String group:RIGGROUPS_XL){
+            for(String group:TopSelectionTabs.RIGGROUPS_XL){
                 rig1TypeBox.addElement(group);
                 rig2TypeBox.addElement(group);
                 rig3TypeBox.addElement(group);
             }
         }else{
-            for(String group:RIGGROUPS){
+            for(String group:TopSelectionTabs.RIGGROUPS){
                 rig1TypeBox.addElement(group);
                 rig2TypeBox.addElement(group);
                 rig3TypeBox.addElement(group);
@@ -406,33 +383,26 @@ public class WindowAddStructure extends javax.swing.JPanel {
         DefaultComboBoxModel rigOptions = new DefaultComboBoxModel();
         ArrayList<Integer> rigGroupIDs=new ArrayList<>();
         if(currentSize.equals("M")){
-            for(String group:STRUCTURE_M_RIGS){
-                if(group.contains(selected)){
-                    rigGroupIDs.add(SDEDatabase.GROUP_IDS.getGroupID(group));
-                }
-            }
+            TopSelectionTabs.STRUCTURE_M_RIGS.stream().filter((group) -> (group.contains(selected))).forEach((group) -> {
+                rigGroupIDs.add(SDEDatabase.GROUP_IDS.getGroupID(group));
+            });
         }
         if(currentSize.equals("L")){
-            for(String group:STRUCTURE_L_RIGS){
-                if(group.contains(selected)){
-                    rigGroupIDs.add(SDEDatabase.GROUP_IDS.getGroupID(group));
-                }
-            }
+            TopSelectionTabs.STRUCTURE_L_RIGS.stream().filter((group) -> (group.contains(selected))).forEach((group) -> {
+                rigGroupIDs.add(SDEDatabase.GROUP_IDS.getGroupID(group));
+            });
         }
         if(currentSize.equals("XL")){
-            for(String group:STRUCTURE_XL_RIGS){
-                if(group.contains(selected)){
-                    rigGroupIDs.add(SDEDatabase.GROUP_IDS.getGroupID(group));
-                }
-            }
+            TopSelectionTabs.STRUCTURE_XL_RIGS.stream().filter((group) -> (group.contains(selected))).forEach((group) -> {
+                rigGroupIDs.add(SDEDatabase.GROUP_IDS.getGroupID(group));
+            });
         }
         rigOptions.addElement("No Rig");
-        for (Integer groupID:rigGroupIDs){
-            ArrayList<String> rigs=SDEDatabase.TYPE_IDS.getByGroupID(groupID);
-            for(String name:rigs){
+        rigGroupIDs.stream().map((groupID) -> SDEDatabase.TYPE_IDS.getByGroupID(groupID)).forEach((rigs) -> {
+            rigs.stream().forEach((name) -> {
                 rigOptions.addElement(name);
-            }
-        }
+            });
+        });
         rigbox.setModel(rigOptions);
     }
 }

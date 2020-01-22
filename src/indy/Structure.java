@@ -205,9 +205,12 @@ public class Structure{
             this.tax+"%"
         };
     }
-
+    
     @Override
-    public String toString() {
-        return "Structure{" + "structureID=" + structureID + ", structureName=" + structureName + ", structureType=" + structureType + ", secLoc=" + secLoc + '}';
+    public boolean equals(Object obj) {
+        if(obj instanceof Structure){
+            return this.structureID==((Structure) obj).structureID;
+        }
+        return false;
     }
 }

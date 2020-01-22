@@ -46,6 +46,7 @@ public class Listeners {
         MainInterface.selectionTabs.addComponentListener(AdjustMainIndyTableVerticle());
         MainInterface.indyJobsTabs.addChangeListener(SwitchInfoTabs());
         MainInterface.structuresTable.getSelectionModel().addListSelectionListener(TopTabSelectListener());
+        MainInterface.addStructure.addActionListener(AddStructureButton());
         
         //Indy Sub Tab Selection and Resize Listeners
         MainInterface.manufacturingTable.getParent().addComponentListener(AdjustIndyTablesHorizontal());
@@ -157,6 +158,18 @@ public class Listeners {
             }
         };
     }
+    
+    private static ActionListener UpdateSelectedStructureListener(){
+        return new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                if(LISTENERS_ACTIVE){
+                    InfoPanel.updateSelectedStructure();
+                }
+            }
+        };
+    }
+    
 
     private static ActionListener DeleteJobButton(){
         return new ActionListener(){
@@ -183,6 +196,15 @@ public class Listeners {
           @Override
           public void actionPerformed(ActionEvent e){
               TopSelectionTabs.deleteCharacter();
+          }
+        };
+    }
+    
+    private static ActionListener AddStructureButton(){
+        return new ActionListener(){
+          @Override
+          public void actionPerformed(ActionEvent e){
+              TopSelectionTabs.addStructure();
           }
         };
     }

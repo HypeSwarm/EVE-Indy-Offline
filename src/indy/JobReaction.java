@@ -65,7 +65,7 @@ public final class JobReaction extends Job {
     public JobReaction(int blueprintID, int structureID, int runs, int blueprintsUsed) {
         super(count.incrementAndGet(),blueprintID, structureID, 11, runs, blueprintsUsed);
         this.baseMaterials=SDEDatabase.BLUEPRINTS.getReactionMaterials(blueprintID);
-        this.outcomeID=SDEDatabase.BLUEPRINTS.getIndyOutputID(blueprintID);
+        this.outcomeID=SDEDatabase.BLUEPRINTS.getManufactoringOutputID(blueprintID);
         this.outcomeName=SDEDatabase.TYPE_IDS.getTypeName(outcomeID);
         this.groupID=SDEDatabase.TYPE_IDS.getGroupID(outcomeID);
         this.categoryID=SDEDatabase.GROUP_IDS.getCategoryID(groupID);

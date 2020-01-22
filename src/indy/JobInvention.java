@@ -89,7 +89,7 @@ public final class JobInvention extends Job{
     }
         
     public void calcDecriptorModified(){
-        if(SDEDatabase.GROUP_IDS.getCategoryID(SDEDatabase.TYPE_IDS.getGroupID(SDEDatabase.BLUEPRINTS.getIndyOutputID(blueprintID)))==6){
+        if(SDEDatabase.GROUP_IDS.getCategoryID(SDEDatabase.TYPE_IDS.getGroupID(SDEDatabase.BLUEPRINTS.getManufactoringOutputID(blueprintID)))==6){
             modRuns=SHIP_BASE_STATS[0];
             modME=SHIP_BASE_STATS[1];
             modTE=SHIP_BASE_STATS[2];

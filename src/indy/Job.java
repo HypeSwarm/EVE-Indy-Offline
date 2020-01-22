@@ -15,7 +15,7 @@ import sde.SDEDatabase;
 public abstract class Job {
     protected final int jobID;
     protected final int blueprintID;
-    protected int structureID;
+    protected Structure structure;
     protected int runs;
     protected final int maxRuns;
     protected int blueprintsUsed;
@@ -27,8 +27,8 @@ public abstract class Job {
         return blueprintID;
     }
 
-    public int getStructureID() {
-        return structureID;
+    public Structure getStructureID() {
+        return structure;
     }
 
     public int getRuns() {
@@ -55,8 +55,8 @@ public abstract class Job {
         this.installFee = installFee;
     }
 
-    public void setStructureID(int structureID) {
-        this.structureID = structureID;
+    public void setStructure(Structure structure) {
+        this.structure = structure;
     }
 
     public void setRuns(int runs) {
@@ -71,23 +71,23 @@ public abstract class Job {
         this.durationModified = durationModified;
     }
 
-    public Job(int jobID, int blueprintID,int structureID,int activityID,int runs,int blueprintsUsed) {
+    public Job(int jobID, int blueprintID,Structure structure,int activityID,int runs,int blueprintsUsed) {
         this.jobID=jobID;
         this.blueprintID=blueprintID;
-        this.structureID=structureID;
+        this.structure=structure;
         this.runs=runs;
         this.maxRuns=SDEDatabase.BLUEPRINTS.getMaxRuns(blueprintID);
         this.blueprintsUsed=blueprintsUsed;
         switch(activityID){
             case 1:
-                this.duration=SDEDatabase.BLUEPRINTS.getIndyDuration(blueprintID);
+                this.duration=SDEDatabase.BLUEPRINTS.getManufactoringDuration(blueprintID);
                 break;
             case 3:
             case 4:
                 this.duration=SDEDatabase.BLUEPRINTS.getResearchDuration(blueprintID);
                 break;
             case 5:
-                this.duration=SDEDatabase.BLUEPRINTS.getCopyDuration(blueprintID);
+                this.duration=SDEDatabase.BLUEPRINTS.getCopyingDuration(blueprintID);
                 break;
             case 8:
                 this.duration=SDEDatabase.BLUEPRINTS.getInventionDuration(blueprintID);
@@ -116,10 +116,6 @@ public abstract class Job {
     
     public Object[] tableData() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public String getStructureName() {
-        return indy.DataArrayLists.getStructureByID(structureID).getStructureName();
     }
     
     public String ModifiedDurationToString(){
